@@ -1,5 +1,9 @@
 spring:
   application:
     name: LiopetriBot
+  shell:
+    interactive:
+      enabled: false
+    
 discord:
   token:

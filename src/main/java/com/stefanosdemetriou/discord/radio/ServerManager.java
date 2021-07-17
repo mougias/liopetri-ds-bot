@@ -1,5 +1,6 @@
 package com.stefanosdemetriou.discord.radio;
 
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -8,7 +9,6 @@ import org.springframework.stereotype.Component;
 import discord4j.core.object.entity.Guild;
 import discord4j.core.object.entity.channel.VoiceChannel;
 import discord4j.voice.VoiceConnection;
-import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 
 /**
@@ -26,7 +26,6 @@ public class ServerManager {
 
 	private final Map<Guild, VoiceConnection> connections = new HashMap<>();
 
-	@Getter
 	private final Map<Guild, String> playing = new HashMap<>();
 
 	/**
@@ -73,5 +72,9 @@ public class ServerManager {
 			this.connections.remove(guild);
 			this.playing.remove(guild);
 		}
+	}
+
+	public Map<Guild, String> playing() {
+		return Collections.unmodifiableMap(this.playing);
 	}
 }

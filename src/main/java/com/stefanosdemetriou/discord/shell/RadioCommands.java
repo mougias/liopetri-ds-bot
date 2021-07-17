@@ -35,13 +35,13 @@ public class RadioCommands {
 	 */
 	@ShellMethod(value = "List currently playing", key = "radio playing")
 	public String listPlaying() {
-		var playing = this.serverManager.getPlaying();
+		var playing = this.serverManager.playing();
 		if (playing.isEmpty()) {
 			return "Nothing is currently playing";
 		}
 
 		var s = new StringBuilder("Currently playing:\n");
-		for (Map.Entry<Guild, String> entry : this.serverManager.getPlaying().entrySet()) {
+		for (Map.Entry<Guild, String> entry : this.serverManager.playing().entrySet()) {
 			s.append("  " + entry.getKey().getName() + " : " + entry.getValue());
 		}
 
