@@ -1,10 +1,12 @@
 package com.stefanosdemetriou.discord.radio;
 
 import com.sedmelluq.discord.lavaplayer.player.AudioPlayer;
+import com.sedmelluq.discord.lavaplayer.player.event.AudioEvent;
+import com.sedmelluq.discord.lavaplayer.player.event.AudioEventListener;
+import com.sedmelluq.discord.lavaplayer.player.event.TrackExceptionEvent;
 import com.sedmelluq.discord.lavaplayer.track.playback.AudioFrame;
 
 import lombok.Getter;
-import lombok.RequiredArgsConstructor;
 
 /**
  * Station Player. Manages the connection the the radio station, and caches
@@ -13,8 +15,7 @@ import lombok.RequiredArgsConstructor;
  * @author stefanos
  *
  */
-@RequiredArgsConstructor
-public class StationPlayer {
+public class StationPlayer implements AudioEventListener {
 
 	private final AudioPlayer audioPlayer;
 
@@ -22,6 +23,11 @@ public class StationPlayer {
 
 	private int reconnectDelay = 1;
 	private long reconnectTime = System.currentTimeMillis();
+
+	public StationPlayer(AudioPlayer player) {
+		this.audioPlayer = player;
+		this.audioPlayer.addListener(this);
+	}
 
 	@Getter
 	private volatile boolean connected = true;
@@ -43,16 +49,9 @@ public class StationPlayer {
 
 		AudioFrame newFrame = null;
 
-		try {
-			newFrame = this.audioPlayer.provide();
-			this.connected = true;
-			this.reconnectTime = 1;
-		} catch (Exception e) {
-			// could have disconnected, so restart with exponential backoff
-			this.connected = false;
-			this.reconnectTime = System.currentTimeMillis() + this.reconnectDelay * 1000;
-			this.reconnectDelay = this.reconnectDelay < 256 ? this.reconnectDelay * 2 : this.reconnectDelay;
-		}
+		newFrame = this.audioPlayer.provide();
+		this.connected = true;
+		this.reconnectTime = 1;
 
 		if (newFrame != null) {
 			this.frame = newFrame;
@@ -66,5 +65,15 @@ public class StationPlayer {
 	 */
 	public String getStationName() {
 		return this.audioPlayer.getPlayingTrack().getInfo().author;
+	}
+
+	@Override
+	public void onEvent(AudioEvent event) {
+		if (event instanceof TrackExceptionEvent) {
+			this.connected = false;
+			this.reconnectTime = System.currentTimeMillis() + this.reconnectDelay * 1000;
+			this.reconnectDelay = this.reconnectDelay < 256 ? this.reconnectDelay * 2 : this.reconnectDelay;
+
+		}
 	}
 }

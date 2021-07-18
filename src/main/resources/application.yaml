@@ -4,6 +4,7 @@ spring:
   shell:
     interactive:
       enabled: false
-    
+server:
+  address: 0.0.0.0
 discord:
   token:
