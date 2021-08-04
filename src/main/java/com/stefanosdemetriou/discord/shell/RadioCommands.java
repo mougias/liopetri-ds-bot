@@ -5,7 +5,7 @@ import java.util.Map;
 import org.springframework.shell.standard.ShellComponent;
 import org.springframework.shell.standard.ShellMethod;
 
-import com.stefanosdemetriou.discord.helpers.RadioFormatter;
+import com.stefanosdemetriou.discord.helpers.StringOutputFormatter;
 import com.stefanosdemetriou.discord.radio.ServerManager;
 import com.stefanosdemetriou.discord.radio.StationPlayerFactory;
 
@@ -25,7 +25,7 @@ public class RadioCommands {
 	 */
 	@ShellMethod(value = "List available radio stations", key = "radio list")
 	public String listStations() {
-		return new RadioFormatter(this.stations.listPlayers()).toString();
+		return StringOutputFormatter.formatRadioStations(this.stations.listPlayers());
 	}
 
 	/**

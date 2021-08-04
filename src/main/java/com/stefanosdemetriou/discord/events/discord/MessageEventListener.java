@@ -6,7 +6,7 @@ import java.util.Optional;
 import org.springframework.stereotype.Service;
 
 import com.stefanosdemetriou.discord.exceptions.NoSuchStationException;
-import com.stefanosdemetriou.discord.helpers.RadioFormatter;
+import com.stefanosdemetriou.discord.helpers.StringOutputFormatter;
 import com.stefanosdemetriou.discord.messaging.MessageFactory;
 import com.stefanosdemetriou.discord.radio.ServerManager;
 import com.stefanosdemetriou.discord.radio.StationPlayer;
@@ -67,7 +67,7 @@ public class MessageEventListener implements EventListener<MessageCreateEvent> {
 		switch (message[0]) {
 		case "list":
 			if (channel != null) {
-				channel.createMessage(new RadioFormatter(this.stations.listPlayers()).toString()).block();
+				channel.createMessage(StringOutputFormatter.formatRadioStations(this.stations.listPlayers())).block();
 			}
 			break;
 		case "play":

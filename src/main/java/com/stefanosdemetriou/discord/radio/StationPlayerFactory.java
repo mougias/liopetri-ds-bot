@@ -1,6 +1,7 @@
 package com.stefanosdemetriou.discord.radio;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 
@@ -54,7 +55,7 @@ public class StationPlayerFactory implements AudioLoadResultHandler {
 	}
 
 	public Iterator<StationPlayer> listPlayers() {
-		return this.players.iterator();
+		return Collections.unmodifiableCollection(this.players).iterator();
 	}
 
 	/**

@@ -1,5 +1,6 @@
 package com.stefanosdemetriou.discord.shell;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -8,7 +9,7 @@ import javax.annotation.PostConstruct;
 import org.springframework.shell.standard.ShellComponent;
 import org.springframework.shell.standard.ShellMethod;
 
-import com.stefanosdemetriou.discord.helpers.ServersFormatter;
+import com.stefanosdemetriou.discord.helpers.StringOutputFormatter;
 
 import discord4j.core.GatewayDiscordClient;
 import discord4j.core.object.entity.Guild;
@@ -42,7 +43,8 @@ public class ServerCommands {
 	@ShellMethod(value = "List servers we are connected to", key = "servers list")
 	public String listServers() {
 		this.reloadServersList();
+		var it = Collections.unmodifiableCollection(this.guilds).iterator();
 
-		return new ServersFormatter(this.guilds.iterator()).toString();
+		return StringOutputFormatter.formatDiscordServers(it);
 	}
 }
