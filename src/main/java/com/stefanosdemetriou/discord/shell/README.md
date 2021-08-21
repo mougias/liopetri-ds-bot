@@ -1,0 +1,1 @@
+You can enable shell by setting `shell.interactive.enabled=true` in the application config. This was mostly used during development. It can be enabled in the docker container if you enable tty, but it can be a little bit tricky.
