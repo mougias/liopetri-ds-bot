@@ -1,6 +1,7 @@
 package com.stefanosdemetriou.discord.messaging;
 
 import java.time.LocalDate;
+import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.time.temporal.ChronoUnit;
 import java.util.concurrent.ScheduledFuture;
@@ -18,11 +19,9 @@ import discord4j.common.util.Snowflake;
 import discord4j.core.GatewayDiscordClient;
 import discord4j.rest.entity.RestChannel;
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 
 @Component
 @RequiredArgsConstructor
-@Slf4j
 public class NewWorldCountdown implements DisposableBean {
 
 	private final GatewayDiscordClient client;
@@ -48,8 +47,8 @@ public class NewWorldCountdown implements DisposableBean {
 			throw new BeanInitializationException("Could not get discord channel by its id");
 		}
 
-		this.cronJob = (ScheduledFuture<Void>) this.scheduler
-				.schedule(() -> this.sendCountdown(channel.getRestChannel()), new CronTrigger("0 0 9 * * *"));
+		this.cronJob = (ScheduledFuture<Void>) this.scheduler.schedule(
+				() -> this.sendCountdown(channel.getRestChannel()), new CronTrigger("0 0 6 * * *", ZoneId.of("UTC")));
 
 		Log.info("New World countdown scheduled");
 	}
