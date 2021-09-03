@@ -4,6 +4,7 @@ import java.time.LocalDate;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.time.temporal.ChronoUnit;
+import java.util.Date;
 import java.util.concurrent.ScheduledFuture;
 
 import javax.annotation.PostConstruct;
@@ -19,9 +20,11 @@ import discord4j.common.util.Snowflake;
 import discord4j.core.GatewayDiscordClient;
 import discord4j.rest.entity.RestChannel;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
 @Component
 @RequiredArgsConstructor
+@Slf4j
 public class NewWorldCountdown implements DisposableBean {
 
 	private final GatewayDiscordClient client;
@@ -50,6 +53,8 @@ public class NewWorldCountdown implements DisposableBean {
 		this.cronJob = (ScheduledFuture<Void>) this.scheduler.schedule(
 				() -> this.sendCountdown(channel.getRestChannel()), new CronTrigger("0 0 6 * * *", ZoneId.of("UTC")));
 
+		this.scheduler.schedule(this::cancelCountDown, new Date(1632834000000L));
+
 		Log.info("New World countdown scheduled");
 	}
 
@@ -61,16 +66,9 @@ public class NewWorldCountdown implements DisposableBean {
 		final var remainingDays = ChronoUnit.DAYS.between(LocalDate.now(), NW_RELEASE_DATE) - 1;
 		final var message = new StringBuilder("Good morning team!");
 
-		if (remainingDays < 0) {
-			try {
-				this.destroy();
-			} catch (Exception e) {
-				// ignore
-			}
-		} else if (remainingDays == 0) {
+		if (remainingDays == 0) {
 			message.append(" je popse!");
 			channel.createMessage(message.toString()).block();
-
 		} else {
 			message.append(" " + remainingDays + " je popse!");
 			channel.createMessage(message.toString()).block();
@@ -78,10 +76,15 @@ public class NewWorldCountdown implements DisposableBean {
 
 	}
 
-	@Override
-	public void destroy() throws Exception {
+	public void cancelCountDown() {
 		if (this.cronJob != null) {
+			log.info("New world countdown cronjob cancelled");
 			this.cronJob.cancel(true);
 		}
+	}
+
+	@Override
+	public void destroy() throws Exception {
+		this.cancelCountDown();
 	}
 }
