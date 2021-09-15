@@ -7,4 +7,4 @@ spring:
 server:
   port: 9020
 discord:
-  token: ODQ4NTYxMDYyMDM0MDE0MjQw.YLOaEg.HOIr4JFnsCqyNI9_h2r3jLF_hxg
+  token: 
