@@ -4,7 +4,9 @@ import java.time.LocalDate;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.time.temporal.ChronoUnit;
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 import java.util.concurrent.ScheduledFuture;
 
 import javax.annotation.PostConstruct;
@@ -16,7 +18,6 @@ import org.springframework.scheduling.TaskScheduler;
 import org.springframework.scheduling.support.CronTrigger;
 import org.springframework.stereotype.Component;
 
-import discord4j.common.util.Snowflake;
 import discord4j.core.GatewayDiscordClient;
 import discord4j.rest.entity.RestChannel;
 import lombok.RequiredArgsConstructor;
@@ -30,28 +31,33 @@ public class NewWorldCountdown implements DisposableBean {
 	private final GatewayDiscordClient client;
 	private final TaskScheduler scheduler;
 
-	private static final long DISCORD_SERVER_ID = 258369598833950723L;
-	private static final long DISCORD_CHANNEL_ID = 582582345790521364L;
+	private static final List<ServerChannelPair> channels = List.of(
+			new ServerChannelPair(258369598833950723L, 582582345790521364L),
+			new ServerChannelPair(880572111196925974L, 880572111968686102L));
 	private static final LocalDate NW_RELEASE_DATE = LocalDate.parse("20210928",
 			DateTimeFormatter.ofPattern("yyyyMMdd"));
 
-	private ScheduledFuture<Void> cronJob;
+	private List<ScheduledFuture<Void>> cronJobs = new ArrayList<>();
 
 	@SuppressWarnings("unchecked")
 	@PostConstruct
 	public void init() {
-		final var server = this.client.getGuildById(Snowflake.of(DISCORD_SERVER_ID)).block();
-		if (server == null) {
-			throw new BeanInitializationException("Could not get discord server by its id");
-		}
+		for (var pair : channels) {
 
-		final var channel = server.getChannelById(Snowflake.of(DISCORD_CHANNEL_ID)).block();
-		if (channel == null) {
-			throw new BeanInitializationException("Could not get discord channel by its id");
-		}
+			final var server = this.client.getGuildById(pair.getServerId()).block();
+			if (server == null) {
+				throw new BeanInitializationException("Could not get discord server by its id");
+			}
 
-		this.cronJob = (ScheduledFuture<Void>) this.scheduler.schedule(
-				() -> this.sendCountdown(channel.getRestChannel()), new CronTrigger("0 0 6 * * *", ZoneId.of("UTC")));
+			final var channel = server.getChannelById(pair.getChannelId()).block();
+			if (channel == null) {
+				throw new BeanInitializationException("Could not get discord channel by its id");
+			}
+
+			this.cronJobs.add(
+					(ScheduledFuture<Void>) this.scheduler.schedule(() -> this.sendCountdown(channel.getRestChannel()),
+							new CronTrigger("0 0 6 * * *", ZoneId.of("UTC"))));
+		}
 
 		this.scheduler.schedule(this::cancelCountDown, new Date(1632834000000L));
 
@@ -77,10 +83,11 @@ public class NewWorldCountdown implements DisposableBean {
 	}
 
 	public void cancelCountDown() {
-		if (this.cronJob != null) {
-			log.info("New world countdown cronjob cancelled");
-			this.cronJob.cancel(true);
+		for (var job : this.cronJobs) {
+			job.cancel(true);
 		}
+
+		log.info("New world countdown cronjobs cancelled");
 	}
 
 	@Override
