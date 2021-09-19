@@ -56,7 +56,7 @@ public class ServerChannelPair {
 		} else if (remainingDays == 1) {
 			message.append(" " + remainingDays + " day and tonight left!");
 		} else {
-			message.append(" " + remainingDays + " day and tonight left!");
+			message.append(" " + remainingDays + " days and tonight left!");
 		}
 	}
 }
