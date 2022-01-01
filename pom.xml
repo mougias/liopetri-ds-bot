@@ -15,7 +15,7 @@
 	<name>liopetri-ds-bot</name>
 	<description>Liopetri Discord Bot</description>
 	<properties>
-		<java.version>16</java.version>
+		<java.version>17</java.version>
 		<sonar.projectKey>liopetri-ds-bot</sonar.projectKey>
 	</properties>
 	<dependencies>
